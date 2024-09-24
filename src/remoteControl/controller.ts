@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
 import service from "./service";
-import { AcState, ResData } from "./types";
+import { AcState, ResData, ResManyData } from "./types";
 
 // Example usage for a generic Express route handler
-const getAllDevices = async () => {
+const getAllDevices = async (apiKey: string) => {
   try {
-    const devices: ResData = await service.getAllDevices();
+    const devices: ResManyData = await service.getAllDevices(apiKey);
     return devices;
   } catch (error) {
     console.error(error);
@@ -13,19 +13,19 @@ const getAllDevices = async () => {
   }
 };
 
-const getDeviceInfo = async (deviceId: string) => {
+const getDeviceInfo = async (apiKey: string, deviceId: string): Promise<ResData>  => {
   try {
-    const deviceInfo = await service.getDeviceInfo(deviceId);
+    const deviceInfo = await service.getDeviceInfo(apiKey, deviceId);
     return deviceInfo;
   } catch (error) {
     console.error(error);
-    return error;
+    throw error;
   }
 };
 
-const getACStates = async (deviceId: string) => {
+const getACStates = async (apiKey: string, deviceId: string) => {
   try {
-    const acStates = await service.getACStates(deviceId);
+    const acStates = await service.getACStates(apiKey, deviceId);
     return acStates;
   } catch (error) {
     console.error(error);
@@ -33,9 +33,9 @@ const getACStates = async (deviceId: string) => {
   }
 };
 
-const setACState = async (deviceId: string, state: AcState) => {
+const setACState = async (apiKey: string, deviceId: string, state: AcState) => {
   try {
-    const response = await service.setACState(deviceId, state);
+    const response = await service.setACState(apiKey, deviceId, state);
     return response;
   } catch (error) {
     console.error(error);
@@ -44,12 +44,13 @@ const setACState = async (deviceId: string, state: AcState) => {
 };
 
 const setACProperty = async (
+  apiKey: string, 
   deviceId: string,
   property: keyof AcState,
-  value: string| boolean | number
+  value: string | boolean | number
 ) => {
   try {
-    const response = await service.setACProperty(deviceId, property, value);
+    const response = await service.setACProperty(apiKey, deviceId, property, value);
     return response;
   } catch (error) {
     console.error(error);

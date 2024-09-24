@@ -1,20 +1,42 @@
 import axios from "./axios";
-import { AcState, ResData } from "./types";
+import { AcState, ResData, ResManyData } from "./types";
 
-const getAllDevices = async (): Promise<any> => {
+const getAllDevices = async (apiKey: string): Promise<ResManyData> => {
   try {
-    const response = await axios.get("/users/me/pods?fields=id,room,acState");
-    return response.data as ResData;
+    const response = await axios.get("/users/me/pods?fields=id,room,acState", {
+      params: { apiKey },
+    });
+    return response.data as ResManyData;
   } catch (error) {
     console.error("Error fetching devices:", error);
-    return error;
+    throw error;
   }
 };
 
 // Get specific device info
-const getDeviceInfo = async (device_id: string) => {
+const getDeviceInfo = async (
+  apiKey: string,
+  device_id: string
+): Promise<ResData> => {
   try {
-    const response = await axios.get(`/pods/${device_id}?fields=*`);
+    const response = await axios.get(
+      `/pods/${device_id}?fields=id,room,acState`,
+      {
+        params: { apiKey },
+      }
+    );
+    return response.data as ResData;
+  } catch (error) {
+    console.error("Error fetching device info:", error);
+    throw error;
+  }
+};
+
+const getACStates = async (apiKey: string, device_id: string) => {
+  try {
+    const response = await axios.get(`/pods/${device_id}/acStates`, {
+      params: { apiKey },
+    });
     return response.data;
   } catch (error) {
     console.error("Error fetching device info:", error);
@@ -22,20 +44,22 @@ const getDeviceInfo = async (device_id: string) => {
   }
 };
 
-const getACStates = async (device_id: string) => {
-  try {
-    const response = await axios.get(`/pods/${device_id}/acStates`);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching device info:", error);
-    return error;
-  }
-};
-
-const setACState = async (device_id: string, state:  AcState) => {
+const setACState = async (
+  apiKey: string,
+  device_id: string,
+  state: AcState
+) => {
   try {
     // add status in body
-    const response = await axios.post(`/pods/${device_id}/acStates`, {acState: state});
+    const response = await axios.post(
+      `/pods/${device_id}/acStates`,
+      {
+        acState: state,
+      },
+      {
+        params: { apiKey },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error fetching device info:", error);
@@ -44,6 +68,7 @@ const setACState = async (device_id: string, state:  AcState) => {
 };
 
 const setACProperty = async (
+  apiKey: string,
   device_id: string,
   property: string,
   value: string | boolean | number
@@ -51,7 +76,10 @@ const setACProperty = async (
   try {
     const response = await axios.patch(
       `/pods/${device_id}/acStates/${property}`,
-      { newValue: value }
+      { newValue: value },
+      {
+        params: { apiKey },
+      }
     );
     return response.data;
   } catch (error) {
